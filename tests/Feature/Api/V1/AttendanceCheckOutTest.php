@@ -15,6 +15,7 @@ class AttendanceCheckOutTest extends TestCase
 
     private function checkIn($user, string $deviceUuid = 'device-0001'): void
     {
+        $this->travelToAttendanceTime('08:00');
         $this->registerDeviceVia($user, $deviceUuid)->assertOk();
 
         $this->post('/api/v1/attendance/events', array_merge([
@@ -28,6 +29,8 @@ class AttendanceCheckOutTest extends TestCase
 
     private function checkOutAt($user, string $time, string $deviceUuid = 'device-0001'): TestResponse
     {
+        $this->travelToAttendanceTime($time);
+
         return $this->post('/api/v1/attendance/events', array_merge([
             'client_event_id' => (string) Str::uuid(),
             'device_uuid' => $deviceUuid,
@@ -117,6 +120,7 @@ class AttendanceCheckOutTest extends TestCase
     public function test_check_out_after_late_check_in_works(): void
     {
         [$user] = $this->makeEmployeeUser();
+        $this->travelToAttendanceTime('09:00');
         $this->registerDeviceVia($user, 'device-0001')->assertOk();
 
         $this->post('/api/v1/attendance/events', array_merge([

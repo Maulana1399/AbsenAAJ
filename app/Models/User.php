@@ -42,6 +42,15 @@ class User extends Authenticatable implements FilamentUser
         ];
     }
 
+    protected static function booted(): void
+    {
+        static::updated(function (User $user): void {
+            if ($user->wasChanged('is_active') && ! $user->is_active) {
+                $user->tokens()->delete();
+            }
+        });
+    }
+
     public function employee(): HasOne
     {
         return $this->hasOne(Employee::class);
@@ -49,6 +58,7 @@ class User extends Authenticatable implements FilamentUser
 
     public function canAccessPanel(Panel $panel): bool
     {
-        return in_array($this->role, [UserRole::ADMIN, UserRole::HR], true);
+        return $this->is_active
+            && in_array($this->role, [UserRole::ADMIN, UserRole::HR], true);
     }
 }

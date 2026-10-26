@@ -111,6 +111,11 @@ trait CreatesAttendanceFixtures
         return Carbon::parse("2026-10-06 {$time}:00", 'Asia/Makassar')->toIso8601String();
     }
 
+    protected function travelToAttendanceTime(string $time): void
+    {
+        $this->travelTo(Carbon::parse("2026-10-06 {$time}:00", 'Asia/Makassar'));
+    }
+
     /**
      * Laravel reuses the app container between requests within one test, and
      * Sanctum caches the resolved user on its guard instance. Reset the

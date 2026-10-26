@@ -22,7 +22,7 @@ class StoreAttendanceEventRequest extends FormRequest
             'client_event_id' => ['required', 'string', 'max:100'],
             'device_uuid' => ['required', 'string', 'max:255'],
             'event_type' => ['required', Rule::enum(AttendanceEventType::class)],
-            'event_at' => ['required', 'date'],
+            'event_at' => ['sometimes', 'date'],
 
             'latitude' => ['required', 'numeric', 'between:-90,90'],
             'longitude' => ['required', 'numeric', 'between:-180,180'],

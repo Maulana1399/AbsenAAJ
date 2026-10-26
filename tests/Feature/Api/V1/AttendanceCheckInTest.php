@@ -16,6 +16,7 @@ class AttendanceCheckInTest extends TestCase
     {
         [$user] = $this->makeEmployeeUser();
         $this->registerDeviceVia($user, 'device-0001')->assertOk();
+        $this->travelToAttendanceTime('08:00');
 
         $response = $this->postEventVia($user, 'device-0001');
 
@@ -36,6 +37,8 @@ class AttendanceCheckInTest extends TestCase
         [$user] = $this->makeEmployeeUser();
         $this->registerDeviceVia($user, 'device-0001');
 
+        $this->travelToAttendanceTime('08:29');
+
         $response = $this->postEventVia($user, 'device-0001', [], [
             'event_at' => $this->eventAt('08:29'),
         ]);
@@ -47,6 +50,8 @@ class AttendanceCheckInTest extends TestCase
     {
         [$user] = $this->makeEmployeeUser();
         $this->registerDeviceVia($user, 'device-0001');
+
+        $this->travelToAttendanceTime('08:30');
 
         $response = $this->postEventVia($user, 'device-0001', [], [
             'event_at' => $this->eventAt('08:30'),
@@ -60,6 +65,8 @@ class AttendanceCheckInTest extends TestCase
         [$user] = $this->makeEmployeeUser();
         $this->registerDeviceVia($user, 'device-0001');
 
+        $this->travelToAttendanceTime('08:35');
+
         $response = $this->postEventVia($user, 'device-0001', [], [
             'event_at' => $this->eventAt('08:35'),
         ]);
@@ -71,6 +78,8 @@ class AttendanceCheckInTest extends TestCase
     {
         [$user] = $this->makeEmployeeUser();
         $this->registerDeviceVia($user, 'device-0001');
+
+        $this->travelToAttendanceTime('08:36');
 
         $response = $this->postEventVia($user, 'device-0001', [], [
             'event_at' => $this->eventAt('08:36'),

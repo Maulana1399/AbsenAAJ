@@ -88,6 +88,9 @@ class AttendanceService
     /**
      * Record a check-in / check-out event with photo and GPS.
      *
+     * The server clock is authoritative for attendance time. The client
+     * event_at is accepted for backward compatibility but is never used.
+     *
      * @return array{event: AttendanceEvent, created: bool}
      */
     public function recordEvent(Employee $employee, array $data, UploadedFile $photo): array
@@ -105,10 +108,10 @@ class AttendanceService
             ];
         }
 
+        $recordedAt = now();
         $device = $this->resolveActiveDevice($employee, $data['device_uuid']);
 
         $eventType = AttendanceEventType::from($data['event_type']);
-        $eventAt = Carbon::parse($data['event_at']);
 
         $branch = $this->resolveBranch($employee);
 
@@ -131,12 +134,12 @@ class AttendanceService
 
         $this->assertSequence($employee, $eventType);
 
-        $status = $this->calculateStatus($eventType, $eventAt);
+        $status = $this->calculateStatus($eventType, $recordedAt);
 
         $path = null;
 
         try {
-            $path = $this->storePhotoFile($employee, $device, $photo);
+            $path = $this->storePhotoFile($employee, $device, $photo, $recordedAt);
             $sha256 = hash_file('sha256', Storage::disk('local')->path($path));
 
             [$event, $created] = DB::transaction(function () use (
@@ -144,7 +147,7 @@ class AttendanceService
                 $device,
                 $data,
                 $eventType,
-                $eventAt,
+                $recordedAt,
                 $status,
                 $path,
                 $sha256,
@@ -157,10 +160,10 @@ class AttendanceService
                         'employee_id' => $employee->id,
                         'device_id' => $device->id,
                         'event_type' => $eventType,
-                        'event_at' => $eventAt,
+                        'event_at' => $recordedAt,
                         'status' => $status,
                         'sync_source' => 'mobile',
-                        'server_received_at' => now(),
+                        'server_received_at' => $recordedAt,
                         'latitude' => $data['latitude'],
                         'longitude' => $data['longitude'],
                         'accuracy_meters' => $data['accuracy_meters'],
@@ -197,7 +200,7 @@ class AttendanceService
             });
 
             if ($created) {
-                $device->update(['last_seen_at' => now()]);
+                $device->update(['last_seen_at' => $recordedAt]);
             }
 
             return ['event' => $event->load('photo'), 'created' => $created];
@@ -320,14 +323,14 @@ class AttendanceService
         }
     }
 
-    private function storePhotoFile(Employee $employee, Device $device, UploadedFile $photo): string
+    private function storePhotoFile(Employee $employee, Device $device, UploadedFile $photo, Carbon $recordedAt): string
     {
         $extension = $this->photoExtension($photo);
         $directory = sprintf(
             'attendance/%d/%s/%s',
             $employee->id,
-            now()->format('Y'),
-            now()->format('m'),
+            $recordedAt->format('Y'),
+            $recordedAt->format('m'),
         );
         $filename = sprintf('%s-%s.%s', $device->id, (string) Str::uuid(), $extension);
 
@@ -371,7 +374,8 @@ class AttendanceService
     {
         $latest = AttendanceEvent::query()
             ->where('employee_id', $employee->id)
-            ->latest('event_at')
+            ->latest('server_received_at')
+            ->latest('id')
             ->first();
 
         if ($type === AttendanceEventType::CHECK_IN) {
@@ -403,9 +407,9 @@ class AttendanceService
         }
     }
 
-    private function calculateStatus(AttendanceEventType $type, Carbon $eventAt): AttendanceStatus
+    private function calculateStatus(AttendanceEventType $type, Carbon $recordedAt): AttendanceStatus
     {
-        $local = $eventAt->copy()->setTimezone(config('attendance.timezone'));
+        $local = $recordedAt->copy()->setTimezone(config('attendance.timezone'));
 
         if ($type === AttendanceEventType::CHECK_IN) {
             $cutoff = $this->localTime($local->toDateString(), config('attendance.shift.start'))
