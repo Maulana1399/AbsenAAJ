@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+    <exclude domain="file" path="attendance_outbox/" />
+    <exclude domain="database" path="attendance_outbox.db" />
+    <exclude domain="database" path="attendance_outbox.db-journal" />
+    <exclude domain="database" path="attendance_outbox.db-wal" />
+    <exclude domain="database" path="attendance_outbox.db-shm" />
+</full-backup-content>

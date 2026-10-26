@@ -1,0 +1,80 @@
+name: absenaaj
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: absenaaj-app
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - ./:/var/www
+    environment:
+      APP_ENV: ${APP_ENV:-local}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - absenaaj-network
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: absenaaj-nginx
+    restart: unless-stopped
+    ports:
+      - "8084:80"
+    volumes:
+      - ./:/var/www:ro
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - app
+    networks:
+      - absenaaj-network
+
+  db:
+    image: mariadb:11
+    container_name: absenaaj-db
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: ${DB_DATABASE:-absenaaj}
+      MARIADB_USER: ${DB_USERNAME:-absenaaj}
+      MARIADB_PASSWORD: ${DB_PASSWORD:-password}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root}
+    volumes:
+      - db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - absenaaj-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: absenaaj-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - absenaaj-network
+
+networks:
+  absenaaj-network:
+    driver: bridge
+
+volumes:
+  db-data:
+    driver: local
+
+  redis-data:
+    driver: local

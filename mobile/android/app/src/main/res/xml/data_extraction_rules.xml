@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="file" path="attendance_outbox/" />
+        <exclude domain="database" path="attendance_outbox.db" />
+        <exclude domain="database" path="attendance_outbox.db-journal" />
+        <exclude domain="database" path="attendance_outbox.db-wal" />
+        <exclude domain="database" path="attendance_outbox.db-shm" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="file" path="attendance_outbox/" />
+        <exclude domain="database" path="attendance_outbox.db" />
+        <exclude domain="database" path="attendance_outbox.db-journal" />
+        <exclude domain="database" path="attendance_outbox.db-wal" />
+        <exclude domain="database" path="attendance_outbox.db-shm" />
+    </device-transfer>
+</data-extraction-rules>
