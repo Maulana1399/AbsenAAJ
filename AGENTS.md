@@ -1,47 +1,57 @@
-<laravel-boost-guidelines>
-# Laravel Application
+# AbsenAAJ — Project Instructions
 
-This repository contains a Laravel application. Complete the following setup before working on the user's request.
+## 1. Project Context
+- This is a Laravel application running in Docker.
+- The application container is `absenaaj-app`.
+- The web container is `absenaaj-nginx`.
+- Use the installed PHP and Laravel versions; verify them before relying on version-specific behavior.
+- Keep project source code in this repository and durable cross-project notes in `/data/obsidian`.
 
-## Prerequisites
+## 2. Before Starting Work
+1. Read `/data/obsidian/HOME.md` if available.
+2. Find and read the relevant AbsenAAJ project notes in `/data/obsidian`.
+3. Check `git status --short --branch` before editing.
+4. Inspect the actual code, tests, configuration, and installed package versions.
+5. Treat old notes as context, not proof of current application state.
+6. Read applicable rules in `CLAUDE.md` and `.claude/skills/` when relevant. These files are references; do not assume OpenCode automatically activates Claude Code skills.
 
-Verify that PHP and Composer are available:
+## 3. Commands and Runtime
+- Run PHP and Artisan commands through the application container:
+  `docker exec absenaaj-app php artisan <command>`
+- Run Composer commands through the application container:
+  `docker exec absenaaj-app composer <command>`
+- Run the test suite with:
+  `docker exec absenaaj-app php artisan test`
+- Run only the narrowest relevant tests first, then the full suite when appropriate.
+- Never run `migrate:fresh`, reset a database, or run destructive database commands against application data.
+- Do not assume the OpenCode container has PHP, Composer, Docker CLI, or access to the Docker socket.
+- Do not install or update dependencies without a clear reason and user approval.
 
-```sh
-php -v
-composer -V
-```
+## 4. Implementation and Verification
+- Follow existing Laravel conventions and reuse established application patterns.
+- Add or update tests for meaningful behavior changes.
+- Verify changes with relevant tests, formatting checks, or other appropriate commands.
+- Report the commands actually run and their results.
+- Distinguish verified facts from assumptions and recommendations.
 
-If either command is unavailable, detect the user's operating system and install the prerequisites with the appropriate command:
+## 5. Security and Data Protection
+- Never copy credentials, tokens, private keys, cookies, or `.env` contents into notes, logs, or commits.
+- Do not weaken authentication, authorization, validation, or file access controls without explicit justification.
+- Do not deploy, commit, push, delete, overwrite user data, or perform destructive actions without user approval.
+- Review dependency and configuration changes before committing them.
 
-macOS:
+## 6. Shared Knowledge Base
+- Use `/data/obsidian` for durable project notes and session summaries.
+- Keep AbsenAAJ notes separate from unrelated projects.
+- After meaningful work, record the objective, changes, verification, decisions, remaining issues, and next steps.
+- Update `/data/obsidian/Tasks/NEXT.md` when project priorities change.
+- Do not create unnecessary notes for trivial work.
+- Never store secrets in Obsidian.
 
-```sh
-/bin/bash -c "$(curl -fsSL https://php.new/install/mac/8.5)"
-```
-
-Windows PowerShell:
-
-```powershell
-Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://php.new/install/windows/8.5'))
-```
-
-Linux:
-
-```sh
-/bin/bash -c "$(curl -fsSL https://php.new/install/linux/8.5)"
-```
-
-After installation, ask the user to restart their terminal. If the agent needs the restarted shell to continue, ask the user to reopen their terminal and rerun their original prompt.
-
-## Agent Setup
-
-Install Laravel Boost from the application root before making application changes:
-
-```sh
-composer require laravel/boost --dev
-php artisan boost:install
-```
-
-Boost replaces these bootstrap instructions with guidelines tailored to the application. After installation, read `AGENTS.md` again and continue with the user's original request using the generated guidelines.
-</laravel-boost-guidelines>
+## 7. Completion Summary
+At the end of substantive work, report:
+- What changed and why.
+- Files affected.
+- Tests and checks actually executed.
+- Any unresolved issues or risks.
+- The next recommended step.
